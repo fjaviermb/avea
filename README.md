@@ -1,9 +1,12 @@
-# Control of an Elgato Avea bulb using a Raspberry Pi & Python
+# Control of an Elgato Avea bulb using Python
+
+The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-Android-Smartphone/dp/B00O4EZ11Q) is a light bulb that connects to an iPhone or Android app via Bluetooth. 
+
+This project aim to control it using a Bluetooth 4.0 compatible device and some Python magic.
 
 Tested with a Raspberry Pi 3 (with integrated bluetooth)
 
-Thanks to [Marmelatze](https://github.com/Marmelatze/avea_bulb) for the POC which made this possible
-
+Thanks to [Marmelatze](https://github.com/Marmelatze/avea_bulb) for the POC
 
 ## Communication protocol
 
@@ -11,7 +14,7 @@ Thanks to [Marmelatze](https://github.com/Marmelatze/avea_bulb) for the POC whic
 
 To communicate the bulb uses Bluetooth 4.0 "BLE"
 
-This provide some interesting features for communications, to learn more go [here](https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt)
+This provide some interesting features for communications, to learn more about it go [here](https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt)
 
 The bulb uses the service `f815e810456c6761746f4d756e696368` and the associated characteristic `f815e811456c6761746f4d756e696368` to send and receive informations about its state (color, name and brightness)
 
@@ -107,6 +110,27 @@ As we craft our own hexadecimal payload, we need to bypass this behavior. A chil
 self._writeCmd("%s %X %s\n" % (cmd, handle, val))
 ```
 
+# Usage
+
+The python script needs to be run as root (to properly access the bluetooth adaptater).
+
+To get some help from the script itself : 
+
+```bash
+sudo python avea.py -h
+```
+You should run it once for it to create a `.avea.conf` file. Then modify the Address field according to your bulb's own address. 
+
+For each color parameter, both absolute and relative values are accepted.
+
+`sudo python avea.py -r 2000` will set the white value to 2000
+`sudo python avea.py -r +1000` will add 1000 to the current white value
+
+The script also supports predefined moods, called with `-m` : 
+
+* `sleep` is a very subtle red light
+* `red` ,`blue`,`green`,`white` are color specific moods
+ 
 # Dependancies
 Needs bluepy for the BLE connection to the bulb. To install : 
 

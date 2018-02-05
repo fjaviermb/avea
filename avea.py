@@ -16,7 +16,7 @@ old_values = {}  # Dict for old values
 arg_values = {}  # Dict for arguments values
 new_values = {}  # Dict for computed values
 config = ConfigParser.ConfigParser()  # Config Parser object
-configFile = "/home/pi/.avea.conf" # Config file path
+configFile = os.path.expanduser("~")+".avea.conf" # Config file path
 
 #
 # ArgParse configuration
