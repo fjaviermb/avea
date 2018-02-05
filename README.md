@@ -88,18 +88,26 @@ Command | Fading time | Useless byte | White value | Red value | Green value | B
 `0x35`|`1101`| `0000`| `0080`|`ff3f`|`0020`|`ff1f`
 
 # Python implementation
-
 To compute the correct values for each color, I created the following (here showing only for white) : 
-
-w is the input value for the white color
 
 ```python
 white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
 ```
 
+# Bluepy writeCharacteristic() overwrite
+By default, the btle.Peripheral() object of bluepy only allows to send UTF-8 encoded strings, which are internally converted to hexadecimal, like this : 
+
+```python
+self._writeCmd("%s %X %s\n" % (cmd, handle, binascii.b2a_hex(val).decode('utf-8')))
+```
+
+As we craft our own hexadecimal payload, we need to bypass this behavior. A child class of Peripheral() is created and overwrites the writeCharacteristic() method, as follows : 
+
+```python
+self._writeCmd("%s %X %s\n" % (cmd, handle, val))
+```
 
 # Dependancies
-
 Needs bluepy for the BLE connection to the bulb. To install : 
 
 ```bash
