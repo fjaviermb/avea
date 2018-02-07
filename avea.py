@@ -1,5 +1,9 @@
 # Creator : Corentin Farque @Hereath
 # Date : 2017-02-04
+# License : MIT
+# 
+# Script that takes control of a given Elgato Avea bulb.
+# Run as root, needs bluepy
 
 #
 #  Imports
