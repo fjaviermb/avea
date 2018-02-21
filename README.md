@@ -4,7 +4,7 @@ The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-A
 
 This project aim to control it using a Bluetooth 4.0 compatible device and some Python magic.
 
-Tested with a Raspberry Pi 3 (with integrated bluetooth)
+Tested with a Raspberry Pi 3 (with integrated bluetooth) 
 
 Thanks to [Marmelatze](https://github.com/Marmelatze/avea_bulb) for the POC
 
@@ -54,7 +54,11 @@ Int | 4-bytes Hexadecimal | Big-endian hex
 
 ### Brightness command
 
-The brightness is also an Int value between 0 and 4095, sent as a big-endian 4-bytes hex value
+The brightness is also an Int value between 0 and 4095, sent as a big-endian 4-bytes hex value. The transmission looks like this : 
+
+Command | Brightness value | 
+---|---
+0x57 | 0xff00
 
 ## Example
 
@@ -113,16 +117,16 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 
 # Usage
 
-The python script needs to be run as root (to properly access the bluetooth adaptater).
+just `python avea.py`
 
-To get some help from the script itself : `sudo python avea.py -h`
+To get some help from the script itself : `python avea.py -h`
 
 You should run it once for it to create a `.avea.conf` file (in your home directofy). Then open it and modify the Address field according to your bulb's own address.
 
 For each color parameter, both absolute and relative values are accepted.
 
-`sudo python avea.py -r 2000` will set the white value to 2000
-`sudo python avea.py -r +1000` will add 1000 to the current white value
+`python avea.py -r 2000` will set the white value to 2000
+`python avea.py -r +1000` will add 1000 to the current white value
 
 The script also supports predefined moods, called with `-m` : 
 
