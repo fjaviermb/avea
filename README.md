@@ -133,6 +133,11 @@ The script also supports predefined moods, called with `-m` :
 * `sleep` is a very subtle red light
 * `red` ,`blue`,`green`,`white` are color specific moods
 
+# TODO
+
+Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script. 
+
+
 # Dependancies
 Needs bluepy for the BLE connection to the bulb. To install : 
 
