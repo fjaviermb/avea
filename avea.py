@@ -3,7 +3,7 @@
 # License : MIT
 # 
 # Script that takes control of a given Elgato Avea bulb.
-# Run as root, needs bluepy
+# Needs bluepy : pip install bluepy
 
 #
 #  Imports
@@ -164,6 +164,7 @@ if __name__ == '__main__':
     bulb = SuperPeripheral(addr)
 
     # Send the values
+    # 40 being the characteristic UUID
     bulb.writeCharacteristic(40, color())
     bulb.writeCharacteristic(40, light())
 
