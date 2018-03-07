@@ -4,7 +4,7 @@ The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-A
 
 This project aim to control it using a Bluetooth 4.0 compatible device and some Python magic.
 
-Tested with a Raspberry Pi 3 and Raspbery Pi Zero W (with integrated bluetooth) 
+Tested with a Raspberry Pi 3 and a Raspbery Pi Zero W (with integrated bluetooth) 
 
 ## Reverse engineering of the bulb
 
