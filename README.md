@@ -6,7 +6,13 @@ This project aim to control it using a Bluetooth 4.0 compatible device and some 
 
 Tested with a Raspberry Pi 3 (with integrated bluetooth) 
 
-Thanks to [Marmelatze](https://github.com/Marmelatze/avea_bulb) for the POC
+Thanks to  for the POC
+
+## Reverse engineering of the bulb
+
+I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb).
+
+I'll be receiving soon a Bluetooth sniffer from Adafruit, which I intend to use for deeper comprehension of the transmission between the Elgato Avea app and the bulb.
 
 ## Communication protocol
 
