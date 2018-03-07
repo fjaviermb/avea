@@ -8,10 +8,10 @@
 #
 #  Imports
 #
-import bluepy
-import ConfigParser
-import argparse
-import os.path
+import bluepy # for bluetooth transmission
+import ConfigParser # for config file management
+import argparse # for sys arg parsing
+import os.path # for config file searching
 
 #
 # Vars
