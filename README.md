@@ -125,7 +125,7 @@ just `python avea.py`
 
 To get some help from the script itself : `python avea.py -h`
 
-You should run it once for it to create a `.avea.conf` file (in your home directofy). Then open it and modify the Address field according to your bulb's own address.
+You should run it once for it to create a `.avea.conf` file (in your home directofy). Then open it and modify the Address field according to your bulb's own address (I may add a scan function later).
 
 For each color parameter, both absolute and relative values are accepted.
 
@@ -140,6 +140,7 @@ The script also supports predefined moods, called with `-m` :
 # TODO
 
 Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script. 
+
 
 
 # Dependancies
