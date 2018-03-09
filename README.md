@@ -10,7 +10,7 @@ Tested with a Raspberry Pi 3 and a Raspbery Pi Zero W (with integrated bluetooth
 
 I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb).
 
-I'll be receiving soon a Bluetooth sniffer from Adafruit, which I intend to use for deeper comprehension of the transmission between the Elgato Avea app and the bulb.
+I'll be receiving soon a [Bluetooth sniffer from Adafruit](https://www.adafruit.com/product/2269), which I intend to use for deeper comprehension of the transmission between the Elgato Avea app and the bulb.
 
 ## Communication protocol
 
@@ -121,22 +121,35 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 
 # Usage
 
+First, do `sudo python avea.py -s`.
+
+This will scan the Bluetooth neighborhood for an Avea Bulb, and create the config file accordingly.
+
+You can now use simply `python avea.py` to control it, see below for arguments.
+
 ## Scan
 
-A scan feature will be implemented soon to automatically find your nearby bulb.
+A scan feature is available via `avea.py -s`. Note that you will need to have root privileges. This will report the MAC address of the Avea bulb.
+
 
 ## Control of the bulb
 
-just `python avea.py`
 
 To get some help from the script itself : `python avea.py -h`
 
-You should run it once for it to create a `.avea.conf` file (in your home directofy). Then open it and modify the Address field according to your bulb's own address (I may add a scan function later).
+An argument is available for each color:
 
-For each color parameter, both absolute and relative values are accepted.
+* red, `-r`,
+* green, `-g`
+* blue, `-b`,
+* white, `-w`,
+* as well as light, `-l`
+ 
 
-`python avea.py -r 2000` will set the white value to 2000
-`python avea.py -r +1000` will add 1000 to the current white value
+For each color/light parameter, both absolute (from 0 to 4096) and relative values are accepted : 
+
+`python avea.py -r 2000` will set the red value to 2000
+`python avea.py -w +1000` will add 1000 to the current white value
 
 The script also supports predefined moods, called with `-m` : 
 
@@ -146,8 +159,6 @@ The script also supports predefined moods, called with `-m` :
 # TODO
 
 Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script. 
-
-
 
 
 # Dependancies

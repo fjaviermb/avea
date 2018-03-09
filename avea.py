@@ -8,10 +8,10 @@
 #
 #  Imports
 #
-import bluepy # for bluetooth transmission
-import ConfigParser # for config file management
-import argparse # for sys arg parsing
-import os.path # for config file searching
+import bluepy  # for bluetooth transmission
+import ConfigParser  # for config file management
+import argparse  # for sys arg parsing
+import os  # for file handling
 
 #
 # Vars
@@ -20,20 +20,22 @@ old_values = {}  # Dict for old values
 arg_values = {}  # Dict for arguments values
 new_values = {}  # Dict for computed values
 config = ConfigParser.ConfigParser()  # Config Parser object
-configFile = os.path.expanduser("~")+".avea.conf" # Config file path
-bulb_addr=""
+configFile = os.path.dirname(os.path.abspath(__file__))+"/.avea.conf"  # Config file path
+bulb_addr = ""
+
 #
 # ArgParse configuration
 #
 parser = argparse.ArgumentParser(description='Control your Elgato Avea bulb using Python ! ')
-parser.add_argument('-r', '--red', help='Set the red value of the bulb (0-4095)', required=False)
-parser.add_argument('-g', '--green', help='Set the green value of the bulb (0-4095)', required=False)
+parser.add_argument('-r', '--red', help='Set the red value of the bulb (0-4095)', default='2048', required=False)
+parser.add_argument('-g', '--green', help='Set the green value of the bulb (0-4095)', default='2048', required=False)
 parser.add_argument('-b', '--blue', help='Set the blue value of the bulb (0-4095)', required=False)
-parser.add_argument('-w', '--white', help='Set the white value of the bulb (0-4095)', required=False)
+parser.add_argument('-w', '--white', help='Set the white value of the bulb (0-4095)', default='2048', required=False)
 parser.add_argument('-l', '--light', help='Set the brightness of the bulb (0-4095)', required=False)
 parser.add_argument('-m', '--mood', help='Set a predefined mood', required=False)
-parser.add_argument('-s','--scan',help='Scan the Bluetooth neighbourhood to find your bulb ! (Need sudo)',action='store_true')
-parser.add_argument('-a','-addr',help='',required=False)
+parser.add_argument('-s', '--scan', help='Scan to find your bulb ! (Need sudo)',action='store_true')
+
+
 
 #
 # Class Peripheral. Used to overwrite the default writeCharacteristic() method that only allows strings as input
@@ -43,6 +45,7 @@ class SuperPeripheral(bluepy.btle.Peripheral):
         cmd = "wrr" if withResponse else "wr"
         self._writeCmd("%s %X %s\n" % (cmd, handle, val))
         return self._getResp('wr')
+
 
 #
 # Functions
@@ -54,14 +57,15 @@ def BLEscan():
     class ScanDelegate(DefaultDelegate):
         def __init__(self):
             DefaultDelegate.__init__(self)
+
     scanner = Scanner().withDelegate(ScanDelegate())
     devices = scanner.scan(4.0)
     for dev in devices:
         for (adtype, desc, value) in dev.getScanData():
             if "Avea" in value:
-                print "Found bulb at addr : " + str(dev.addr)
-                print "Added to config file !"
+                print "Found bulb : " + str(dev.addr)
                 bulb_addr = str(dev.addr)
+
 
 # Check if the config file exists, else create and fill it
 def check_config_file():
@@ -76,6 +80,7 @@ def check_config_file():
         config.set('Avea', 'blue', '2000')
         with open(configFile, 'wb') as configfile:
             config.write(configfile)
+        os.chmod(configFile, 0777)
 
 
 
@@ -143,10 +148,7 @@ if __name__ == '__main__':
 
     # Get old values from config file
     config.read(configFile)
-    if arg_values['addr'] is not None:
-        addr=arg_values['addr']
-    else:
-        addr = config.get('Avea', 'Address')
+    addr = config.get('Avea', 'Address')
     for each in ["light", "white", "red", "green", "blue"]:
         old_values[each] = config.get('Avea', each)
 
