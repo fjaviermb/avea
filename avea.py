@@ -21,7 +21,7 @@ arg_values = {}  # Dict for arguments values
 new_values = {}  # Dict for computed values
 config = ConfigParser.ConfigParser()  # Config Parser object
 configFile = os.path.expanduser("~")+".avea.conf" # Config file path
-
+bulb_addr=""
 #
 # ArgParse configuration
 #
@@ -32,8 +32,8 @@ parser.add_argument('-b', '--blue', help='Set the blue value of the bulb (0-4095
 parser.add_argument('-w', '--white', help='Set the white value of the bulb (0-4095)', required=False)
 parser.add_argument('-l', '--light', help='Set the brightness of the bulb (0-4095)', required=False)
 parser.add_argument('-m', '--mood', help='Set a predefined mood', required=False)
-
-
+parser.add_argument('-s','--scan',help='Scan the Bluetooth neighbourhood to find your bulb ! (Need sudo)',action='store_true')
+parser.add_argument('-a','-addr',help='',required=False)
 
 #
 # Class Peripheral. Used to overwrite the default writeCharacteristic() method that only allows strings as input
@@ -48,11 +48,27 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 # Functions
 #
 
+def BLEscan():
+    global bulb_addr
+    from bluepy.btle import Scanner, DefaultDelegate, Peripheral
+    class ScanDelegate(DefaultDelegate):
+        def __init__(self):
+            DefaultDelegate.__init__(self)
+    scanner = Scanner().withDelegate(ScanDelegate())
+    devices = scanner.scan(4.0)
+    for dev in devices:
+        for (adtype, desc, value) in dev.getScanData():
+            if "Avea" in value:
+                print "Found bulb at addr : " + str(dev.addr)
+                print "Added to config file !"
+                bulb_addr = str(dev.addr)
+
 # Check if the config file exists, else create and fill it
 def check_config_file():
+    global bulb_addr
     if not os.path.isfile(configFile):
         config.add_section('Avea')
-        config.set('Avea', 'Address', '78:A5:04:8E:9E:57')
+        config.set('Avea', 'Address', ('XX:XX:XX:XX:XX' if bulb_addr is "" else bulb_addr))
         config.set('Avea', 'light', '2000')
         config.set('Avea', 'white', '2000')
         config.set('Avea', 'red', '2000')
@@ -60,6 +76,7 @@ def check_config_file():
         config.set('Avea', 'blue', '2000')
         with open(configFile, 'wb') as configfile:
             config.write(configfile)
+
 
 
 # Updates the new values to the config file
@@ -117,18 +134,21 @@ def light():
 # Actual code
 #
 if __name__ == '__main__':
+    arg_values = vars(parser.parse_args())
 
+    if arg_values['scan']:
+        BLEscan()
     # Check for config file
     check_config_file()
 
     # Get old values from config file
     config.read(configFile)
-    addr = config.get('Avea', 'Address')
+    if arg_values['addr'] is not None:
+        addr=arg_values['addr']
+    else:
+        addr = config.get('Avea', 'Address')
     for each in ["light", "white", "red", "green", "blue"]:
         old_values[each] = config.get('Avea', each)
-
-    # Get arguments values
-    arg_values = vars(parser.parse_args())
 
     # Check if mood is set
     if arg_values["mood"]:
