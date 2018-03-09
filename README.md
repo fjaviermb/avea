@@ -121,6 +121,12 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 
 # Usage
 
+## Scan
+
+A scan feature will be implemented soon to automatically find your nearby bulb.
+
+## Control of the bulb
+
 just `python avea.py`
 
 To get some help from the script itself : `python avea.py -h`
@@ -140,6 +146,7 @@ The script also supports predefined moods, called with `-m` :
 # TODO
 
 Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script. 
+
 
 
 
