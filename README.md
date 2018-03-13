@@ -10,8 +10,6 @@ Tested with a Raspberry Pi 3 and a Raspbery Pi Zero W (with integrated bluetooth
 
 I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb).
 
-I'll be receiving soon a [Bluetooth sniffer from Adafruit](https://www.adafruit.com/product/2269), which I intend to use for deeper comprehension of the transmission between the Elgato Avea app and the bulb.
-
 ## Communication protocol
 
 ### Intro
