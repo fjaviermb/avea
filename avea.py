@@ -3,13 +3,13 @@
 # License : MIT
 # 
 # Script that takes control of a given Elgato Avea bulb.
-# Needs bluepy : pip install bluepy
+# Needs bluepy : sudo pip3 install bluepy
 
 #
 #  Imports
 #
 import bluepy  # for bluetooth transmission
-import ConfigParser  # for config file management
+import configparser  # for config file management
 import argparse  # for sys arg parsing
 import os  # for file handling
 
@@ -19,7 +19,7 @@ import os  # for file handling
 old_values = {}  # Dict for old values
 arg_values = {}  # Dict for arguments values
 new_values = {}  # Dict for computed values
-config = ConfigParser.ConfigParser()  # Config Parser object
+config = configparser.ConfigParser()  # Config Parser object
 configFile = os.path.dirname(os.path.abspath(__file__))+"/.avea.conf"  # Config file path
 bulb_addr = ""
 
@@ -63,7 +63,7 @@ def BLEscan():
     for dev in devices:
         for (adtype, desc, value) in dev.getScanData():
             if "Avea" in value:
-                print "Found bulb : " + str(dev.addr)
+                print ("Found bulb : " + str(dev.addr))
                 bulb_addr = str(dev.addr)
 
 
@@ -78,9 +78,9 @@ def check_config_file():
         config.set('Avea', 'red', '2000')
         config.set('Avea', 'green', '2000')
         config.set('Avea', 'blue', '2000')
-        with open(configFile, 'wb') as configfile:
+        with open(configFile, 'w') as configfile:
             config.write(configfile)
-        os.chmod(configFile, 0777)
+        os.chmod(configFile, 0o777)
 
 
 
@@ -89,7 +89,7 @@ def update_values():
     for each in new_values:
         if new_values[each]:
             config.set('Avea', each, new_values[each])
-    with open(configFile, 'wb') as configfile:
+    with open(configFile, 'w') as configfile:
         config.write(configfile)
 
 
