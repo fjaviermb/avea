@@ -1,21 +1,18 @@
 # Creator : Corentin Farque @Hereath
-# Date : 2017-02-04
+# Creation date : 2017-02-04
 # License : MIT
-# 
+#
 # Script that takes control of a given Elgato Avea bulb.
 # Needs bluepy : sudo pip3 install bluepy
 
-#
+
 #  Imports
-#
 import bluepy  # for bluetooth transmission
 import configparser  # for config file management
 import argparse  # for sys arg parsing
 import os  # for file handling
 
-#
 # Vars
-#
 old_values = {}  # Dict for old values
 arg_values = {}  # Dict for arguments values
 new_values = {}  # Dict for computed values
@@ -23,9 +20,7 @@ config = configparser.ConfigParser()  # Config Parser object
 configFile = os.path.dirname(os.path.abspath(__file__))+"/.avea.conf"  # Config file path
 bulb_addr = ""
 
-#
 # ArgParse configuration
-#
 parser = argparse.ArgumentParser(description='Control your Elgato Avea bulb using Python ! ')
 parser.add_argument('-r', '--red', help='Set the red value of the bulb (0-4095)', default='2048', required=False)
 parser.add_argument('-g', '--green', help='Set the green value of the bulb (0-4095)', default='2048', required=False)
@@ -37,9 +32,9 @@ parser.add_argument('-s', '--scan', help='Scan to find your bulb ! (Need sudo)',
 
 
 
-#
-# Class Peripheral. Used to overwrite the default writeCharacteristic() method that only allows strings as input
-#
+# Overwrite of the Bluepy 'Peripheral' class.
+# It also overwrites the default writeCharacteristic() method,
+# which by default only allows strings as input
 class SuperPeripheral(bluepy.btle.Peripheral):
     def writeCharacteristic(self, handle, val, withResponse=False):
         cmd = "wrr" if withResponse else "wr"
@@ -47,10 +42,9 @@ class SuperPeripheral(bluepy.btle.Peripheral):
         return self._getResp('wr')
 
 
-#
-# Functions
-#
-
+# Scan the BLE neighborhood for an Avea bulb
+# and add its address to the config file
+# This method requires the script to be launched as root
 def BLEscan():
     global bulb_addr
     from bluepy.btle import Scanner, DefaultDelegate, Peripheral
@@ -59,11 +53,11 @@ def BLEscan():
             DefaultDelegate.__init__(self)
 
     scanner = Scanner().withDelegate(ScanDelegate())
-    devices = scanner.scan(4.0)
+    devices = scanner.scan(6.0)
     for dev in devices:
         for (adtype, desc, value) in dev.getScanData():
             if "Avea" in value:
-                print ("Found bulb : " + str(dev.addr))
+                print ("Found bulb : " + str(dev.addr)+", adding it to the config file")
                 bulb_addr = str(dev.addr)
 
 
@@ -135,14 +129,17 @@ def light():
     return "57" + value
 
 
-#
 # Actual code
-#
 if __name__ == '__main__':
     arg_values = vars(parser.parse_args())
 
+    # If the scan flag is set, then run the BLE scan and exit
     if arg_values['scan']:
-        BLEscan()
+        BLEscan() # Scan
+        check_config_file() # Create the config file if necessary
+        update_values() # Update the address field
+        exit() # Quit
+
     # Check for config file
     check_config_file()
 
@@ -180,6 +177,7 @@ if __name__ == '__main__':
             else:
                 new_values[each] = old_values[each]
 
+    # Avoid values that are out-of-bounds
     check_values_boundaries()
 
     # Connect to the bulb

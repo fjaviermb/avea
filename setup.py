@@ -7,7 +7,7 @@ setuptools.setup(
     name="avea",
     version="0.0.1",
     author="Hereath",
-    author_email="author@example.com",
+    author_email="corentinfarque@gmail.com",
     description="Control an Elgato Avea bulb using python",
     long_description=long_description,
     long_description_content_type="text/markdown",
