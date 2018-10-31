@@ -1,5 +1,8 @@
 # Control of an Elgato Avea bulb using Python
 
+
+![](https://img.shields.io/badge/python_flavor-3.x-brightgreen.svg?style=for-the-badge)
+
 The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-Android-Smartphone/dp/B00O4EZ11Q) is a light bulb that connects to an iPhone or Android app via Bluetooth.
 
 This project aim to control it using a Bluetooth 4.0 compatible device and some Python magic.
@@ -118,11 +121,11 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 
 # Usage
 
-First, do `sudo python avea.py -s`.
+First, do `sudo python3 avea.py -s`.
 
 This will scan the Bluetooth neighborhood for an Avea Bulb, and create the config file accordingly.
 
-You can now use simply `python avea.py` to control it, see below for arguments.
+You can now use simply `python3 avea.py` to control it, see below for arguments.
 
 ## Scan
 
@@ -131,7 +134,7 @@ A scan feature is available via `avea.py -s`. Note that you will need to have ro
 
 ## Control of the bulb
 
-To get some help from the script itself : `python avea.py -h`
+To get some help from the script itself : `python3 avea.py -h`
 
 An argument is available for each color:
 
@@ -144,8 +147,8 @@ An argument is available for each color:
 
 For each color/light parameter, both absolute (from 0 to 4096) and relative values are accepted :
 
-`python avea.py -r 2000` will set the red value to 2000
-`python avea.py -w +1000` will add 1000 to the current white value
+`python3 avea.py -r 2000` will set the red value to 2000
+`python3 avea.py -w +1000` will add 1000 to the current white value
 
 The script also supports predefined moods, called with `-m` :
 
@@ -154,7 +157,8 @@ The script also supports predefined moods, called with `-m` :
 
 # TODO
 
-Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script.
+- Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script.
+- Query the bulb for its current state
 
 
 
