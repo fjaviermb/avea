@@ -1,12 +1,10 @@
 language: python
-sudo: true
-
 python:
   - "3.4"
 
 before_install:
   - sudo apt-get install -y python3-pip libglib2.0-dev
-  - cd avea/
+
 script:
-  - pip3 install avea
-  - sudo python3 avea.py
+  - python3 setup.py install
+  - python3 avea/avea.py
