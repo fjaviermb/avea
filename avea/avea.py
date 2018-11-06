@@ -1,9 +1,10 @@
 # Creator : Corentin Farque @Hereath
 # Creation date : 2017-02-04
 # License : MIT
+# Source : https://github.com/Hereath/avea
 #
-# Script that takes control of a given Elgato Avea bulb.
-# Needs bluepy : sudo pip3 install bluepy
+# Description : Script that takes control of a given Elgato Avea bulb.
+# Dependancies : sudo pip3 install bluepy
 
 
 #  Imports
@@ -12,41 +13,70 @@ import configparser  # for config file management
 import argparse  # for sys arg parsing
 import os  # for file handling
 
-# Vars
-old_values = {}  # Dict for old values
-arg_values = {}  # Dict for arguments values
-new_values = {}  # Dict for computed values
-config = configparser.ConfigParser()  # Config Parser object
-configFile = os.path.dirname(os.path.abspath(__file__))+"/.avea.conf"  # Config file path
-bulb_addr = ""
+# TODO: Definition of moods to be used in setMood()
 
-# ArgParse configuration
-parser = argparse.ArgumentParser(description='Control your Elgato Avea bulb using Python ! ')
-parser.add_argument('-r', '--red', help='Set the red value of the bulb (0-4095)', default='2048', required=False)
-parser.add_argument('-g', '--green', help='Set the green value of the bulb (0-4095)', default='2048', required=False)
-parser.add_argument('-b', '--blue', help='Set the blue value of the bulb (0-4095)', required=False)
-parser.add_argument('-w', '--white', help='Set the white value of the bulb (0-4095)', default='2048', required=False)
-parser.add_argument('-l', '--light', help='Set the brightness of the bulb (0-4095)', required=False)
-parser.add_argument('-m', '--mood', help='Set a predefined mood', required=False)
-parser.add_argument('-s', '--scan', help='Scan to find your bulb ! (Need sudo)',action='store_true')
+class Bulb():
+    """
+    The class that represents an Avea bulb using its MAC address
+    """
+    def __init__(self,address):
+        """
+        Set the object's address
+        And create a modified bluepy.btle.Peripheral object,
+        see the SuperPeripheral class below for an explanation
+        """
+        self.addr = address
+        self.bulb = SuperPeripheral(this.addr)
 
+    def computeBrightness(self,brightness):
+        """
+        Return the hex code for the specified brightness
+        """
+        value = hex(int(brightness))[2:]
+        value = value.zfill(4)
+        value = value[2:] + value[:2]
+        return "57" + value
 
+    def computeColor(self,w=2000,r=0,g=0,b=0):
+        """
+        Return the hex code for the specified colors
+        """
+        color = "35"
+        fading = "1101"
+        unknow = "0a00"
+        white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
+        red = hex(int(r) | int(0x3000))[2:].zfill(4)[2:] + hex(int(r) | int(0x3000))[2:].zfill(4)[:2]
+        green = hex(int(g) | int(0x2000))[2:].zfill(4)[2:] + hex(int(g) | int(0x2000))[2:].zfill(4)[:2]
+        blue = hex(int(b) | int(0x1000))[2:].zfill(4)[2:] + hex(int(b) | int(0x1000))[2:].zfill(4)[:2]
 
-# Overwrite of the Bluepy 'Peripheral' class.
-# It also overwrites the default writeCharacteristic() method,
-# which by default only allows strings as input
-class SuperPeripheral(bluepy.btle.Peripheral):
-    def writeCharacteristic(self, handle, val, withResponse=False):
-        cmd = "wrr" if withResponse else "wr"
-        self._writeCmd("%s %X %s\n" % (cmd, handle, val))
-        return self._getResp('wr')
+        return color + fading + unknow + white + red + green + blue
 
+    def setColor(self, white,red,green,blue):
+        """
+        Wraper for computeColor()
+        """
+        self.bulb.writeCharacteristic(40, computeColor(check_boundaries(white),check_boundaries(red),check_boundaries(green),check_boundaries(blue)))
 
-# Scan the BLE neighborhood for an Avea bulb
-# and add its address to the config file
-# This method requires the script to be launched as root
-def BLEscan():
-    global bulb_addr
+    def setBrightness(self,brightness):
+        """
+        Wraper for computeBrightness()
+        """
+        self.bulb.writeCharacteristic(40, computeBrightness(check_boundaries(brightness)))
+
+    def setMood(self,mood):
+        """
+        Set the bulb to a predefined mood
+        # TODO: needs a more complete list of moods
+        """
+        pass
+
+def discoverAveaBulbs():
+    """
+    Scan the BLE neighborhood for an Avea bulb
+    and add its address to the config file
+    This method requires the script to be launched as root
+    """
+    bulb_list = []
     from bluepy.btle import Scanner, DefaultDelegate, Peripheral
     class ScanDelegate(DefaultDelegate):
         def __init__(self):
@@ -57,136 +87,45 @@ def BLEscan():
     for dev in devices:
         for (adtype, desc, value) in dev.getScanData():
             if "Avea" in value:
-                print ("Found bulb : " + str(dev.addr)+", adding it to the config file")
-                bulb_addr = str(dev.addr)
+                print("Found bulb with address " + str(dev.addr)+" !")
+                bulb_list.append(str(dev.addr))
+    return bulb_list
 
 
-# Check if the config file exists, else create and fill it
-def check_config_file():
-    global bulb_addr
-    if not os.path.isfile(configFile):
-        config.add_section('Avea')
-        config.set('Avea', 'Address', ('XX:XX:XX:XX:XX' if bulb_addr is "" else bulb_addr))
-        config.set('Avea', 'light', '2000')
-        config.set('Avea', 'white', '2000')
-        config.set('Avea', 'red', '2000')
-        config.set('Avea', 'green', '2000')
-        config.set('Avea', 'blue', '2000')
-        with open(configFile, 'w') as configfile:
-            config.write(configfile)
-        os.chmod(configFile, 0o777)
+def check_boundaries(value):
+    """
+    Check if the given value is out-of-bounds (0 to 4095)
+    If so, correct it and return the inbounds value
+    This is required for the payload to be properly understood by the bulb
+    """
+    if int(value) > 4095:
+        return 4095
 
-
-
-# Updates the new values to the config file
-def update_values():
-    for each in new_values:
-        if new_values[each]:
-            config.set('Avea', each, new_values[each])
-    with open(configFile, 'w') as configfile:
-        config.write(configfile)
-
-
-# Check each value for out-of-boudnaries (0 to 4095) and correct them
-def check_values_boundaries():
-    for each in new_values:
-        if new_values[each]:
-            # More than 4095
-            if int(new_values[each]) > 4095:
-                new_values[each] = '4095'
-
-            # Less than 0
-            if int(new_values[each]) < 0:
-                new_values[each] = '0'
-
-
-# Return the hex code for the specified colors
-def color():
-    global new_values
-    w = new_values["white"]
-    r = new_values["red"]
-    g = new_values["green"]
-    b = new_values["blue"]
-
-    color = "35"
-    fading = "1101"
-    unknow = "0a00"
-    white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
-    red = hex(int(r) | int(0x3000))[2:].zfill(4)[2:] + hex(int(r) | int(0x3000))[2:].zfill(4)[:2]
-    green = hex(int(g) | int(0x2000))[2:].zfill(4)[2:] + hex(int(g) | int(0x2000))[2:].zfill(4)[:2]
-    blue = hex(int(b) | int(0x1000))[2:].zfill(4)[2:] + hex(int(b) | int(0x1000))[2:].zfill(4)[:2]
-
-    return color + fading + unknow + white + red + green + blue
-
-
-# Return the hex code for the specified brightness
-def light():
-    global new_values
-    brightness = new_values["light"]
-    value = hex(int(brightness))[2:]
-    value = value.zfill(4)
-    value = value[2:] + value[:2]
-    return "57" + value
-
-
-# Actual code
-if __name__ == '__main__':
-    arg_values = vars(parser.parse_args())
-
-    # If the scan flag is set, then run the BLE scan and exit
-    if arg_values['scan']:
-        BLEscan() # Scan
-        check_config_file() # Create the config file if necessary
-        update_values() # Update the address field
-        exit() # Quit
-
-    # Check for config file
-    check_config_file()
-
-    # Get old values from config file
-    config.read(configFile)
-    addr = config.get('Avea', 'Address')
-    for each in ["light", "white", "red", "green", "blue"]:
-        old_values[each] = config.get('Avea', each)
-
-    # Check if mood is set
-    if arg_values["mood"]:
-        mood = arg_values["mood"]
-        if "red" in mood:
-            new_values = {'blue': '0', 'light': '4095', 'white': '0', 'green': '0', 'red': '4095'}
-        if "blue" in mood:
-            new_values = {'blue': '4095', 'light': '4095', 'white': '0', 'green': '0', 'red': '0'}
-        if "green" in mood:
-            new_values = {'blue': '0', 'light': '4095', 'white': '0', 'green': '4095', 'red': '0'}
-        if "white" in mood:
-            new_values = {'blue': '0', 'light': '4095', 'white': '4095', 'green': '0', 'red': '0'}
-        if "sleep" in mood:
-            new_values = {'blue': '0', 'light': '10', 'white': '0', 'green': '0', 'red': '4095'}
+    elif int(value) < 0:
+        return 0
     else:
-        # Else check args values
-        for each in ["light", "white", "red", "green", "blue"]:
-            if arg_values[each]:  # Does the value is set ?
+        return value
 
-                # Check for sign
-                if "+" in arg_values[each] or "-" in arg_values[each]:
-                    new_values[each] = str(int(old_values[each]) + int(arg_values[each]))  # Add old values with arg one
 
-                # Absolute value
-                else:
-                    new_values[each] = arg_values[each]
-            else:
-                new_values[each] = old_values[each]
+class SuperPeripheral(bluepy.btle.Peripheral):
+    """
+    Overwrite of the Bluepy 'Peripheral' class.
+    It overwrites the default writeCharacteristic() method,
+    which by default only allows strings as input
+    As we craft our own paylod, we need to bypass this behavior
+    """
+    def writeCharacteristic(self, handle, val, withResponse=False):
+        cmd = "wrr" if withResponse else "wr"
+        self._writeCmd("%s %X %s\n" % (cmd, handle, val))
+        return self._getResp('wr')
 
-    # Avoid values that are out-of-bounds
-    check_values_boundaries()
 
-    # Connect to the bulb
-    bulb = SuperPeripheral(addr)
+# Example code on how to use it
+if __name__ == '__main__':
+    # get nearby bulbs in a list
+    nearbyBulbs = avea.discoverAveaBulbs();
 
-    # Send the values
-    # 40 being the characteristic UUID
-    bulb.writeCharacteristic(40, color())
-    bulb.writeCharacteristic(40, light())
-
-    # Update values
-    update_values()
+    # for each bulb, set medium brightness and a red color
+    for bulb in nearbyBulbs:
+        bulb.setBrightness(2000) # ranges from 0 to 4095
+        bulb.setColor(0,4095,0,0) # in order : white, red, green, blue

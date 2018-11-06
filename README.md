@@ -3,11 +3,43 @@
 
 ![](https://img.shields.io/badge/python_flavor-3.x-brightgreen.svg?style=for-the-badge)
 
+
 The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-Android-Smartphone/dp/B00O4EZ11Q) is a light bulb that connects to an iPhone or Android app via Bluetooth.
 
 This project aim to control it using a Bluetooth 4.0 compatible device and some Python magic.
 
-Tested with a Raspberry Pi 3 and a Raspbery Pi Zero W (with integrated bluetooth)
+Tested on Raspberry Pi 3 and Zero W (with integrated bluetooth)
+
+## TL;DR
+
+```bash
+# install dependancies
+sudo apt-get install python3-pip libglib2.0-dev
+
+sudo pip3 install avea
+```
+
+
+## Basic lib usage
+
+Below is an example of how to use the lib to quickly get the surrounding bulbs and setting them to the wanted color/brightness
+
+```python3
+import avea
+
+# get nearby bulbs in a list
+nearbyBulbs = avea.discoverAveaBulbs();
+
+# for each bulb, set medium brightness and a red color
+for bulb in nearbyBulbs:
+    bulb.setBrightness(2000) # ranges from 0 to 4095
+    bulb.setColor(0,4095,0,0) # in order : white, red, green, blue
+```
+
+That's it. Pretty simple.
+
+See the doc for more doc and features !
+
 
 ## Reverse engineering of the bulb
 
@@ -17,9 +49,9 @@ I've used the informations given by [Marmelatze](https://github.com/Marmelatze/a
 
 ### Intro
 
-To communicate the bulb uses Bluetooth 4.0 "BLE"
+To communicate the bulb uses Bluetooth 4.0 "BLE", which provide some interesting features for communications, to learn more about it go [here](https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt).
 
-This provide some interesting features for communications, to learn more about it go [here](https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt). To sum up, the bulb emits a set of `services` which have `characteristics`. We transmit to the latter to communicate.
+To sum up, the bulb emits a set of `services` which have `characteristics`. We use the latter to communicate to the device.
 
 The bulb uses the service `f815e810456c6761746f4d756e696368` and the associated characteristic `f815e811456c6761746f4d756e696368` to send and receive informations about its state (color, name and brightness)
 
@@ -131,41 +163,7 @@ You can now use simply `python3 avea.py` to control it, see below for arguments.
 
 A scan feature is available via `avea.py -s`. Note that you will need to have root privileges. This will report the MAC address of the Avea bulb.
 
-
-## Control of the bulb
-
-To get some help from the script itself : `python3 avea.py -h`
-
-An argument is available for each color:
-
-* red, `-r`,
-* green, `-g`
-* blue, `-b`,
-* white, `-w`,
-* as well as light, `-l`
-
-
-For each color/light parameter, both absolute (from 0 to 4096) and relative values are accepted :
-
-`python3 avea.py -r 2000` will set the red value to 2000
-`python3 avea.py -w +1000` will add 1000 to the current white value
-
-The script also supports predefined moods, called with `-m` :
-
-* `sleep` is a very subtle red light
-* `red` ,`blue`,`green`,`white` are color specific moods
-
 # TODO
 
 - Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script.
 - Query the bulb for its current state
-
-
-
-# Dependancies
-Needs bluepy for the BLE connection to the bulb. To install :
-
-```bash
-sudo apt-get install python3-pip libglib2.0-dev
-sudo pip3 install bluepy
-```
