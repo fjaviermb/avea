@@ -27,7 +27,7 @@ class Bulb():
         see the SuperPeripheral class below for an explanation
         """
         self.addr = address
-        self.bulb = SuperPeripheral(this.addr)
+        self.bulb = SuperPeripheral(self.addr)
 
     def computeBrightness(self,brightness):
         """
@@ -56,13 +56,13 @@ class Bulb():
         """
         Wraper for computeColor()
         """
-        self.bulb.writeCharacteristic(40, computeColor(check_boundaries(white),check_boundaries(red),check_boundaries(green),check_boundaries(blue)))
+        self.bulb.writeCharacteristic(40, self.computeColor(check_boundaries(white),check_boundaries(red),check_boundaries(green),check_boundaries(blue)))
 
     def setBrightness(self,brightness):
         """
         Wraper for computeBrightness()
         """
-        self.bulb.writeCharacteristic(40, computeBrightness(check_boundaries(brightness)))
+        self.bulb.writeCharacteristic(40, self.computeBrightness(check_boundaries(brightness)))
 
     # TODO
     def setMood(self,mood):
@@ -104,7 +104,7 @@ def discoverAveaBulbs():
         for (adtype, desc, value) in dev.getScanData():
             if "Avea" in value:
                 print("Found bulb with address " + str(dev.addr)+" !")
-                bulb_list.append(str(dev.addr))
+                bulb_list.append(Bulb(dev.addr))
     return bulb_list
 
 

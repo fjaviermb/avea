@@ -13,7 +13,7 @@ Tested on Raspberry Pi 3 and Zero W (with integrated bluetooth)
 ## TL;DR
 
 ```bash
-# install dependancies
+# install dependancies if needed
 sudo apt-get install python3-pip libglib2.0-dev
 
 sudo pip3 install avea
@@ -24,11 +24,13 @@ sudo pip3 install avea
 
 Below is an example of how to use the lib to quickly get the surrounding bulbs and setting them to the wanted color/brightness
 
+** /!\ Important : To use the scan feature of bluepy, the script needs to be launched as root (or use sudo -E) /!\ **
+
 ```python3
 import avea
 
 # get nearby bulbs in a list
-nearbyBulbs = avea.discoverAveaBulbs();
+nearbyBulbs = avea.discoverAveaBulbs()
 
 # for each bulb, set medium brightness and a red color
 for bulb in nearbyBulbs:
