@@ -7,4 +7,3 @@ before_install:
 
 script:
   - python3 setup.py install
-  - python3 -m "import avea"

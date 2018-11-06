@@ -1,6 +1,8 @@
 # Control of an Elgato Avea bulb using Python
 
-![](https://img.shields.io/badge/python_flavor-3.x-brightgreen.svg?style=for-the-badge) ![Travis (.org)](https://img.shields.io/travis/Hereath/avea.svg?style=for-the-badge) ![PyPI](https://img.shields.io/pypi/v/avea.svg?style=for-the-badge)
+![](https://img.shields.io/badge/python_flavor-3.x-brightgreen.svg?style=for-the-badge)
+![Travis (.org)](https://img.shields.io/travis/Hereath/avea.svg?style=for-the-badge)
+![PyPI](https://img.shields.io/pypi/v/avea.svg?style=for-the-badge)
 
 The [Avea bulb from Elgato](https://www.amazon.co.uk/Elgato-Avea-Dynamic-Light-Android-Smartphone/dp/B00O4EZ11Q) is a light bulb that connects to an iPhone or Android app via Bluetooth.
 
