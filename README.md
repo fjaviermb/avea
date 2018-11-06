@@ -26,7 +26,7 @@ Below is an example of how to use the lib to quickly get the surrounding bulbs a
 
 ** /!\ Important : To use the scan feature of bluepy, the script needs to be launched as root (or use sudo -E) /!\ **
 
-```python3
+```python
 import avea
 
 # get nearby bulbs in a list
