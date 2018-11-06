@@ -123,7 +123,7 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 # Example code on how to use it
 if __name__ == '__main__':
     # get nearby bulbs in a list
-    nearbyBulbs = avea.discoverAveaBulbs();
+    nearbyBulbs = discoverAveaBulbs();
 
     # for each bulb, set medium brightness and a red color
     for bulb in nearbyBulbs:
