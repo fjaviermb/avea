@@ -1,0 +1,20 @@
+language: python
+sudo: true
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+before_install:
+  - sudo apt-get install python3-pip libglib2.0-dev
+
+# command to run tests
+jobs:
+  include:
+    - stage:  test source
+    - script: sudo python3 avea.py
+    - stage:  install
+    - script: sudo pip3 install avea
+    - stage : test lib
+    - script: python3 -c "import avea"
