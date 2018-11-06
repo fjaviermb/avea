@@ -6,7 +6,6 @@
 # Description : Script that takes control of a given Elgato Avea bulb.
 # Dependancies : sudo pip3 install bluepy
 
-
 #  Imports
 import bluepy  # for bluetooth transmission
 import configparser  # for config file management
@@ -29,40 +28,17 @@ class Bulb():
         self.addr = address
         self.bulb = SuperPeripheral(self.addr)
 
-    def computeBrightness(self,brightness):
-        """
-        Return the hex code for the specified brightness
-        """
-        value = hex(int(brightness))[2:]
-        value = value.zfill(4)
-        value = value[2:] + value[:2]
-        return "57" + value
-
-    def computeColor(self,w=2000,r=0,g=0,b=0):
-        """
-        Return the hex code for the specified colors
-        """
-        color = "35"
-        fading = "1101"
-        unknow = "0a00"
-        white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
-        red = hex(int(r) | int(0x3000))[2:].zfill(4)[2:] + hex(int(r) | int(0x3000))[2:].zfill(4)[:2]
-        green = hex(int(g) | int(0x2000))[2:].zfill(4)[2:] + hex(int(g) | int(0x2000))[2:].zfill(4)[:2]
-        blue = hex(int(b) | int(0x1000))[2:].zfill(4)[2:] + hex(int(b) | int(0x1000))[2:].zfill(4)[:2]
-
-        return color + fading + unknow + white + red + green + blue
-
     def setColor(self, white,red,green,blue):
         """
         Wraper for computeColor()
         """
-        self.bulb.writeCharacteristic(40, self.computeColor(check_boundaries(white),check_boundaries(red),check_boundaries(green),check_boundaries(blue)))
+        self.bulb.writeCharacteristic(40, computeColor(check_boundaries(white),check_boundaries(red),check_boundaries(green),check_boundaries(blue)))
 
     def setBrightness(self,brightness):
         """
         Wraper for computeBrightness()
         """
-        self.bulb.writeCharacteristic(40, self.computeBrightness(check_boundaries(brightness)))
+        self.bulb.writeCharacteristic(40, computeBrightness(check_boundaries(brightness)))
 
     # TODO
     def setMood(self,mood):
@@ -86,6 +62,7 @@ class Bulb():
         """
         pass
 
+
 def discoverAveaBulbs():
     """
     Scan the BLE neighborhood for an Avea bulb
@@ -108,19 +85,49 @@ def discoverAveaBulbs():
     return bulb_list
 
 
+def computeBrightness(brightness):
+    """
+    Return the hex code for the specified brightness
+    """
+    value = hex(int(brightness))[2:]
+    value = value.zfill(4)
+    value = value[2:] + value[:2]
+    return "57" + value
+
+
+def computeColor(w=2000,r=0,g=0,b=0):
+    """
+    Return the hex code for the specified colors
+    """
+    color = "35"
+    fading = "1101"
+    unknow = "0a00"
+    white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
+    red = hex(int(r) | int(0x3000))[2:].zfill(4)[2:] + hex(int(r) | int(0x3000))[2:].zfill(4)[:2]
+    green = hex(int(g) | int(0x2000))[2:].zfill(4)[2:] + hex(int(g) | int(0x2000))[2:].zfill(4)[:2]
+    blue = hex(int(b) | int(0x1000))[2:].zfill(4)[2:] + hex(int(b) | int(0x1000))[2:].zfill(4)[:2]
+
+    return color + fading + unknow + white + red + green + blue
+
+
 def check_boundaries(value):
     """
     Check if the given value is out-of-bounds (0 to 4095)
     If so, correct it and return the inbounds value
     This is required for the payload to be properly understood by the bulb
     """
-    if int(value) > 4095:
-        return 4095
+    try:
+        if int(value) > 4095:
+            return 4095
 
-    elif int(value) < 0:
+        elif int(value) < 0:
+            return 0
+        else:
+            return value
+    except ValueError:
+        print("Value was not a number, returned default value of 0")
         return 0
-    else:
-        return value
+
 
 
 class SuperPeripheral(bluepy.btle.Peripheral):
@@ -139,7 +146,7 @@ class SuperPeripheral(bluepy.btle.Peripheral):
 # Example code on how to use it
 if __name__ == '__main__':
     # get nearby bulbs in a list
-    nearbyBulbs = discoverAveaBulbs();
+    nearbyBulbs = discoverAveaBulbs()
 
     # for each bulb, set medium brightness and a red color
     for bulb in nearbyBulbs:
