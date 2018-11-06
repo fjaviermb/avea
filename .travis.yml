@@ -1,5 +1,4 @@
 language: python
-sudo: enabled
 python:
   - "3.4"
 
@@ -8,4 +7,3 @@ before_install:
 
 script:
   - python3 setup.py install
-  - sudo -E python3 -m "import avea"

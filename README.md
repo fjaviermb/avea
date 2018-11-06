@@ -153,19 +153,7 @@ class SuperPeripheral(bluepy.btle.Peripheral):
         return self._getResp('wr')
 ```
 
-# Usage
-
-First, do `sudo python3 avea.py -s`.
-
-This will scan the Bluetooth neighborhood for an Avea Bulb, and create the config file accordingly.
-
-You can now use simply `python3 avea.py` to control it, see below for arguments.
-
-## Scan
-
-A scan feature is available via `avea.py -s`. Note that you will need to have root privileges. This will report the MAC address of the Avea bulb.
-
-# TODO
+## TODO
 
 - Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script.
 - Query the bulb for its current state

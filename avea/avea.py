@@ -4,7 +4,6 @@
 # Source : https://github.com/Hereath/avea
 #
 # Description : Script that takes control of a given Elgato Avea bulb.
-# Dependancies : sudo pip3 install bluepy
 
 #  Imports
 import bluepy  # for bluetooth transmission
