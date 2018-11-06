@@ -15,6 +15,7 @@ import os  # for file handling
 
 # TODO: Definition of moods to be used in setMood()
 
+
 class Bulb():
     """
     The class that represents an Avea bulb using its MAC address
@@ -63,10 +64,25 @@ class Bulb():
         """
         self.bulb.writeCharacteristic(40, computeBrightness(check_boundaries(brightness)))
 
+    # TODO
     def setMood(self,mood):
         """
         Set the bulb to a predefined mood
         # TODO: needs a more complete list of moods
+        """
+        pass
+
+    # TODO
+    def getBrightness(self):
+        """
+        Retrieve and return the current brightness of the bulb
+        """
+        pass
+
+    # TODO
+    def getColor(self):
+        """
+        Retrieve and return the current color of the bulb
         """
         pass
 
