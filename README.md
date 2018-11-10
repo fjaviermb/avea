@@ -13,39 +13,58 @@ Tested on Raspberry Pi 3 and Zero W (with integrated bluetooth)
 ## TL;DR
 
 ```bash
-# install dependancies if needed
+# install pip3 and bluepy's dependancy libglib2
 sudo apt-get install python3-pip libglib2.0-dev
 
-sudo pip3 install avea
+pip3 install avea
 ```
 
 
-## Basic lib usage
+## Library usage
 
-Below is an example of how to use the lib to quickly get the surrounding bulbs and setting them to the wanted color/brightness
+Below is a quick how-to of the various methods of the library.
 
-**Important : To use the scan feature of bluepy (the discoverAveaBulbs() function of the module), the script needs to be launched as root (or use sudo -E)**
+**Important : To use the scan feature of bluepy (the discover_avea_bulbs() function of the module), the script needs to be launched as root (or sudo -E)**
 
 ```python
-import avea
+import avea # Important !
 
-# get nearby bulbs in a list
-nearbyBulbs = avea.discoverAveaBulbs()
-
-# for each bulb, set medium brightness and a red color
+# get nearby bulbs in a list, then retrieve the name of all bulbs
+nearbyBulbs = avea.discover_avea_bulbs()
 for bulb in nearbyBulbs:
-    bulb.setBrightness(2000) # ranges from 0 to 4095
-    bulb.setColor(0,4095,0,0) # in order : white, red, green, blue
+    bulb.get_name()
+    print(bulb.name)
+
+# Or create a bulb if you know its address
+myBulb = Bulb("xx:xx:xx:xx:xx:xx")
+
+# Setter
+myBulb.set_brightness(2000)  # ranges from 0 to 4095
+myBulb.set_color(0,4095,0,0)  # in order : white, red, green, blue
+myBulb.set_name("bedroom")
+
+# Getter
+myBulb.get_name()  # Query the name of the bulb
+myBulb.get_color() # Query the current color
+myBulb.get_brightness() # query the current brightness level
+
+# You can also access the values of the bulb without querying using the object variables
+print(myBulb.brightness)
+print(myBulb.white)
 ```
 
 That's it. Pretty simple.
 
-See the doc for more doc and features !
-
+Check the explanation below for some more informations, or check the source !
 
 ## Reverse engineering of the bulb
 
 I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb) as well as some reverse engineering using a `btsnoop_hci.log` file and Wireshark.
+
+Below is a pretty thorough explanation of the BLE communication and the python implementation to communicate with the bulb.
+
+As BLE communication is quite complicated, you might want to skip all of this if you just want to use the library. But it's quite interesting.
+
 
 ## Communication protocol
 
@@ -129,31 +148,35 @@ Command | Fading time | Useless byte | White value | Red value | Green value | B
 ---|---|---|---|---|---|---
 `0x35`|`1101`| `0000`| `0080`|`ff3f`|`0020`|`ff1f`
 
-# Python implementation
+
+## Python implementation
 To compute the correct values for each color, I created the following conversion (here showing for white) :
 
 ```python
-white = hex(int(w) | int(0x8000))[2:].zfill(4)[2:] + hex(int(w) | int(0x8000))[2:].zfill(4)[:2]
+white = (int(w) | int(0x8000)).to_bytes(2, byteorder='little').hex()
 ```
 
-# Bluepy writeCharacteristic() overwrite
-By default, the btle.Peripheral() object of bluepy only allows to send UTF-8 encoded strings, which are internally converted to hexadecimal, like this :
+## Bluepy writeCharacteristic() overwrite
+By default, the btle.Peripheral() object of bluepy only allows to send UTF-8 encoded strings, which are internally converted to hexadecimal. As we craft our own hexadecimal payload, we need to bypass this behavior. A child class of Peripheral() is created and overwrites the writeCharacteristic() method, as follows :
 
 ```python
-self._writeCmd("%s %X %s\n" % (cmd, handle, binascii.b2a_hex(val).decode('utf-8')))
-```
-
-As we craft our own hexadecimal payload, we need to bypass this behavior. A child class of Peripheral() is created and overwrites the writeCharacteristic() method, as follows :
-
-```python
-class SuperPeripheral(bluepy.btle.Peripheral):
-    def writeCharacteristic(self, handle, val, withResponse=False):
+class AveaPeripheral(bluepy.btle.Peripheral):
+    def writeCharacteristic(self, handle, val, withResponse=True):
         cmd = "wrr" if withResponse else "wr"
         self._writeCmd("%s %X %s\n" % (cmd, handle, val))
         return self._getResp('wr')
 ```
 
+## Working with notifications using Bluepy
+To reply to our packets, the bulb is using BLE notifications, and some setup is required to be able to receive these notifications with bluepy.
+
+To subscribe to the bulb's notifications, we must send a "0100" to the BLE handle which is just after the one used for communication. As we use handle 0x0028 (40 for bluepy) to communicate, we will send the notification payload to the handle 0x0029 (so 41 for bluepy)
+
+```python
+self.bulb.writeCharacteristic(41, "0100")
+```
+After that, we will receive notifications from the bulb.
+
 ## TODO
 
 - Add the possibility to launch ambiances (which are mood-based scenes built in the bulb itslef) from the script.
-- Query the bulb for its current state
