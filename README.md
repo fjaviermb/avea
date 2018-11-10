@@ -24,7 +24,7 @@ sudo pip3 install avea
 
 Below is an example of how to use the lib to quickly get the surrounding bulbs and setting them to the wanted color/brightness
 
-** /!\ Important : To use the scan feature of bluepy, the script needs to be launched as root (or use sudo -E) /!\ **
+**Important : To use the scan feature of bluepy (the discoverAveaBulbs() function of the module), the script needs to be launched as root (or use sudo -E)**
 
 ```python
 import avea
@@ -45,7 +45,7 @@ See the doc for more doc and features !
 
 ## Reverse engineering of the bulb
 
-I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb).
+I've used the informations given by [Marmelatze](https://github.com/Marmelatze/avea_bulb) as well as some reverse engineering using a `btsnoop_hci.log` file and Wireshark.
 
 ## Communication protocol
 
