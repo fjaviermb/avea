@@ -30,6 +30,7 @@ Below is a quick how-to of the various methods of the library.
 import avea # Important !
 
 # get nearby bulbs in a list, then retrieve the name of all bulbs
+# Using this method requires root privileges
 nearbyBulbs = avea.discover_avea_bulbs()
 for bulb in nearbyBulbs:
     bulb.get_name()
@@ -44,9 +45,9 @@ myBulb.set_color(0,4095,0,0)  # in order : white, red, green, blue
 myBulb.set_name("bedroom")
 
 # Getter
-myBulb.get_name()  # Query the name of the bulb
-myBulb.get_color() # Query the current color
-myBulb.get_brightness() # query the current brightness level
+print(myBulb.get_name())  # Query the name of the bulb
+theName = myBulb.get_color() # Query the current color
+theBrightness = myBulb.get_brightness() # query the current brightness level
 
 # You can also access the values of the bulb without querying using the object variables
 print(myBulb.brightness)
