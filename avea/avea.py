@@ -65,39 +65,42 @@ class Bulb:
 
         self.bulb.writeCharacteristic(40, compute_brightness(check_bounds(brightness)))
 
-    # TODO : Reverse engineer how to select and send moods requests
-    # what Elgato's app is calling 'ambiances'
+
     def set_mood(self, mood):
         """
         Set the bulb to a predefined mood
-        # TODO: needs a more complete list of moods
+        # TODO: Reverse engineer how to select and send moods requests
         """
         pass
 
     def get_brightness(self):
         """Retrieve and return the current brightness of the bulb"""
 
-        print("sending the request")
         self.bulb.writeCharacteristic(40, "57")
         self.bulb.waitForNotifications(1.0)
+        return self.brightness
 
     def get_color(self):
         """Retrieve and return the current color of the bulb
 
         A .5s sleep is here to accomodate for the bulb's response time :
         If get_color() is called directly after set_color(), the bulb
-        won't reply with the new values
+        either won't reply at all or will reply with garbage values
+
+        It returns a tuple as follows : (white, red, green, blue)
         """
+
         time.sleep(0.5)
         self.bulb.writeCharacteristic(40, "35")
         self.bulb.waitForNotifications(1.0)
+        return (self.white, self.red, self.green, self.blue)
 
     def get_name(self):
-        """Get the name of the bulb"""
+        """Get and return the name of the bulb"""
 
-        print("Retrieving bulb's name..")
         self.bulb.writeCharacteristic(40, "58")
         self.bulb.waitForNotifications(1.0)
+        return self.name
 
     def set_name(self, name):
         """Set the name of the bulb"""
@@ -105,7 +108,6 @@ class Bulb:
         byteName = name.encode("utf-8")
         command = "58"+byteName.hex()
         self.bulb.writeCharacteristic(40,command)
-
 
     def process_notification(self, data):
         """Method called when a notification is send from the bulb
@@ -238,16 +240,25 @@ class AveaPeripheral(bluepy.btle.Peripheral):
 
 # Example code on how to use it
 if __name__ == '__main__':
-    # get nearby bulbs in a list
-    nearbyBulbs = discover_avea_bulbs()
-
-    # Or create a bulb if you know its address
-    myBulb = Bulb("xx:xx:xx:xx:xx:xx")
-
-    # for each bulb
+    # get nearby bulbs in a list, then retrieve the name of all bulbs
+    nearbyBulbs = avea.discover_avea_bulbs()
     for bulb in nearbyBulbs:
         bulb.get_name()
         print(bulb.name)
 
-        bulb.set_brightness(2000)  # ranges from 0 to 4095
-        bulb.set_color(0, 4095, 0, 0)  # in order : white, red, green, blue
+    # Or create a bulb if you know its address
+    myBulb = Bulb("xx:xx:xx:xx:xx:xx")
+
+    # Setter
+    myBulb.set_brightness(2000)  # ranges from 0 to 4095
+    myBulb.set_color(0,4095,0,0)  # in order : white, red, green, blue
+    myBulb.set_name("bedroom")
+
+    # Getter
+    print(myBulb.get_name())  # Query the name of the bulb
+    theName = myBulb.get_color() # Query the current color
+    theBrightness = myBulb.get_brightness() # query the current brightness level
+
+    # You can also access the values of the bulb without querying using the object variables
+    print(myBulb.brightness)
+    print(myBulb.white)
