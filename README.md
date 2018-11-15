@@ -16,7 +16,13 @@ Tested on Raspberry Pi 3 and Zero W (with integrated bluetooth)
 # install pip3 and bluepy's dependancy libglib2
 sudo apt-get install python3-pip libglib2.0-dev
 
+# Install from pip
 pip3 install avea
+
+# Install from source
+git clone https://github.com/Hereath/avea
+cd avea
+sudo python setup.py install
 ```
 
 
