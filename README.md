@@ -43,7 +43,7 @@ for bulb in nearbyBulbs:
     print(bulb.name)
 
 # Or create a bulb if you know its address
-myBulb = Bulb("xx:xx:xx:xx:xx:xx")
+myBulb = avea.Bulb("xx:xx:xx:xx:xx:xx")
 
 # Setter
 myBulb.set_brightness(2000)  # ranges from 0 to 4095
